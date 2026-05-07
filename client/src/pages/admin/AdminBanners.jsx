@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Upload, GripVertical, Eye, EyeOff, ImageIcon } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
@@ -67,80 +67,255 @@ export default function AdminBanners() {
   return (
     <>
       <Helmet><title>Banners | Admin | VSS</title></Helmet>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+        .cinzel { font-family: 'Cinzel', serif; }
+        .cormorant { font-family: 'Cormorant Garamond', serif; }
+        .lux-inter { font-family: 'Inter', sans-serif; }
+        .luxury-card {
+          background: #fff;
+          border: 1px solid rgba(212,175,55,0.15);
+          border-radius: 16px;
+          box-shadow: 0 4px 24px rgba(92,10,10,0.06);
+        }
+        .form-section {
+          background: linear-gradient(135deg, #fdfaf5, #fff9f0);
+          border: 1px solid rgba(212,175,55,0.25);
+          border-radius: 16px;
+          padding: 28px;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 20px rgba(212,175,55,0.08);
+        }
+        .gold-input {
+          width: 100%;
+          border: 1px solid rgba(212,175,55,0.25);
+          border-radius: 10px;
+          padding: 10px 16px;
+          font-size: 13px;
+          outline: none;
+          transition: all 0.2s;
+          background: #fff;
+          font-family: 'Inter', sans-serif;
+          color: #3d0707;
+        }
+        .gold-input:focus {
+          border-color: #D4AF37;
+          box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
+        }
+        .label-style {
+          display: block;
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #9b7b7b;
+          margin-bottom: 6px;
+          font-family: 'Inter', sans-serif;
+        }
+        .upload-zone {
+          border: 2px dashed rgba(212,175,55,0.35);
+          border-radius: 12px;
+          padding: 20px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: rgba(212,175,55,0.03);
+          position: relative;
+        }
+        .upload-zone:hover {
+          border-color: #D4AF37;
+          background: rgba(212,175,55,0.07);
+        }
+        .btn-primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          background: linear-gradient(135deg, #5C0A0A, #8B1A1A);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          padding: 10px 22px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.25s;
+          font-family: 'Inter', sans-serif;
+        }
+        .btn-primary:hover {
+          background: linear-gradient(135deg, #D4AF37, #B8960C);
+          box-shadow: 0 4px 16px rgba(212,175,55,0.3);
+          transform: translateY(-1px);
+        }
+        .banner-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px 20px;
+          border-bottom: 1px solid rgba(212,175,55,0.07);
+          transition: background 0.2s;
+        }
+        .banner-row:last-child { border-bottom: none; }
+        .banner-row:hover { background: rgba(212,175,55,0.03); }
+        .banner-preview {
+          width: 100px;
+          height: 60px;
+          border-radius: 10px;
+          overflow: hidden;
+          flex-shrink: 0;
+          border: 1px solid rgba(212,175,55,0.15);
+          background: linear-gradient(135deg, #f7f3ee, #f0ebe3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .active-badge {
+          padding: 3px 10px;
+          border-radius: 20px;
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          display: inline-flex;
+          background: rgba(16,185,129,0.1);
+          color: #047857;
+          border: 1px solid rgba(16,185,129,0.2);
+        }
+        .hidden-badge {
+          padding: 3px 10px;
+          border-radius: 20px;
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          display: inline-flex;
+          background: rgba(156,163,175,0.1);
+          color: #6b7280;
+          border: 1px solid rgba(156,163,175,0.2);
+        }
+        .action-btn {
+          width: 32px; height: 32px;
+          border-radius: 8px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; transition: all 0.2s;
+          border: none; background: transparent; color: #b8a090;
+        }
+        .toggle-btn:hover { background: rgba(212,175,55,0.1); color: #B8960C; }
+        .delete-btn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        .skeleton {
+          background: linear-gradient(90deg, #f7f3ee 25%, #f0ebe3 50%, #f7f3ee 75%);
+          background-size: 1000px 100%;
+          animation: shimmer 2s infinite;
+          border-radius: 10px;
+        }
+      `}</style>
+
       <AdminLayout title="Manage Banners">
-        <div className="max-w-4xl mx-auto">
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+
           {/* Add New Banner */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 mb-8">
-            <h3 className="text-sm font-bold text-brand-dark uppercase tracking-wider mb-6">Add New Banner</h3>
+          <div className="form-section">
+            <h3 className="cinzel text-sm font-semibold mb-1" style={{ color: '#5C0A0A' }}>✦ Add New Banner</h3>
+            <p className="lux-inter text-xs mb-6" style={{ color: '#b8a090' }}>Upload a banner image and set its title, subtitle, and link.</p>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Title *</label>
+                <label className="label-style">Title *</label>
                 <input value={newBanner.title} onChange={e => setNewBanner(f => ({ ...f, title: e.target.value }))}
-                  placeholder="e.g. Summer Bridal Collection" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-gold/20 focus:border-brand-gold" />
+                  placeholder="e.g. Summer Bridal Collection" className="gold-input" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Subtitle</label>
+                <label className="label-style">Subtitle</label>
                 <input value={newBanner.subtitle} onChange={e => setNewBanner(f => ({ ...f, subtitle: e.target.value }))}
-                  placeholder="Optional tagline" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-gold/20 focus:border-brand-gold" />
+                  placeholder="Optional tagline" className="gold-input" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Link</label>
+                <label className="label-style">Link</label>
                 <input value={newBanner.link} onChange={e => setNewBanner(f => ({ ...f, link: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-gold/20 focus:border-brand-gold" />
+                  className="gold-input" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Banner Image *</label>
-                <div className="flex items-center gap-3">
-                  {newBanner.image?.url && <img src={newBanner.image.url} alt="" className="w-20 h-12 rounded object-cover border" />}
-                  <label className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${uploading ? 'text-gray-400' : 'text-brand-gold hover:text-brand-gold-dark'}`}>
-                    <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Image'}
+                <label className="label-style">Banner Image *</label>
+                {newBanner.image?.url ? (
+                  <div style={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', height: '80px', border: '1px solid rgba(212,175,55,0.2)' }}>
+                    <img src={newBanner.image.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <label className="lux-inter" style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', color: '#D4AF37', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+                      <Upload size={14} style={{ marginRight: '6px' }} /> Change
+                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+                    </label>
+                  </div>
+                ) : (
+                  <label className="upload-zone">
+                    <Upload size={20} style={{ color: uploading ? '#D4AF37' : '#c9a96e', margin: '0 auto 6px' }} />
+                    <p className="lux-inter text-xs font-medium" style={{ color: uploading ? '#D4AF37' : '#9b7b7b' }}>
+                      {uploading ? 'Uploading...' : 'Click to upload banner image'}
+                    </p>
+                    <p className="lux-inter text-xs mt-1" style={{ color: '#c9a96e' }}>Recommended: 1920×600px</p>
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
                   </label>
-                </div>
+                )}
               </div>
             </div>
-            <div className="flex justify-end mt-5">
-              <button onClick={addBanner} className="flex items-center gap-2 bg-brand-dark hover:bg-brand-gold text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors">
-                <Plus size={16} /> Add Banner
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button onClick={addBanner} className="btn-primary">
+                <Plus size={15} /> Add Banner
               </button>
             </div>
           </div>
 
           {/* Banner List */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100">
-              <h3 className="text-sm font-bold text-brand-dark uppercase tracking-wider">Current Banners ({banners.length})</h3>
+          <div className="luxury-card overflow-hidden">
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
+              <h3 className="cinzel text-sm font-semibold" style={{ color: '#5C0A0A' }}>
+                Current Banners
+                <span className="lux-inter font-normal text-xs ml-2" style={{ color: '#b8a090' }}>({banners.length} total)</span>
+              </h3>
             </div>
+
             {loading ? (
-              <div className="p-8 space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-gray-50 rounded-lg animate-pulse" />)}</div>
-            ) : banners.length === 0 ? (
-              <div className="p-12 text-center"><p className="text-gray-500">No banners yet. Add one above.</p></div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {banners.map((banner, idx) => (
-                  <div key={banner._id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/50 transition-colors">
-                    <GripVertical size={16} className="text-gray-300 shrink-0 cursor-grab" />
-                    <div className="w-24 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-                      {banner.image?.url ? <img src={banner.image.url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gray-200" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-brand-dark text-sm">{banner.title}</p>
-                      {banner.subtitle && <p className="text-xs text-gray-400 line-clamp-1">{banner.subtitle}</p>}
-                    </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${banner.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {banner.isActive ? 'Active' : 'Hidden'}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => toggleBanner(banner._id, banner.isActive)} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-amber-50 hover:text-amber-600 transition-colors">
-                        {banner.isActive ? <EyeOff size={15} /> : <Eye size={15} />}
-                      </button>
-                      <button onClick={() => deleteBanner(banner._id)} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors">
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <div style={{ padding: '24px' }}>
+                {[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ height: '80px', marginBottom: '12px' }} />)}
               </div>
+            ) : banners.length === 0 ? (
+              <div style={{ padding: '60px', textAlign: 'center' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(212,175,55,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <ImageIcon size={24} style={{ color: '#D4AF37' }} />
+                </div>
+                <p className="cinzel" style={{ color: '#5C0A0A', fontWeight: 600 }}>No banners yet</p>
+                <p className="lux-inter text-xs mt-1" style={{ color: '#b8a090' }}>Add your first banner above</p>
+              </div>
+            ) : (
+              banners.map((banner) => (
+                <div key={banner._id} className="banner-row">
+                  <GripVertical size={16} style={{ color: '#D4AF37', opacity: 0.5, cursor: 'grab', flexShrink: 0 }} />
+                  <div className="banner-preview">
+                    {banner.image?.url
+                      ? <img src={banner.image.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <ImageIcon size={20} style={{ color: '#D4AF37', opacity: 0.4 }} />
+                    }
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="lux-inter font-semibold text-sm" style={{ color: '#3d0707' }}>{banner.title}</p>
+                    {banner.subtitle && <p className="lux-inter text-xs mt-0.5 line-clamp-1" style={{ color: '#b8a090' }}>{banner.subtitle}</p>}
+                    <p className="lux-inter text-xs mt-0.5 font-mono" style={{ color: '#c9a96e' }}>{banner.link}</p>
+                  </div>
+                  <span className={banner.isActive ? 'active-badge' : 'hidden-badge'}>
+                    {banner.isActive ? 'Live' : 'Hidden'}
+                  </span>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={() => toggleBanner(banner._id, banner.isActive)} className="action-btn toggle-btn">
+                      {banner.isActive ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                    <button onClick={() => deleteBanner(banner._id)} className="action-btn delete-btn">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>

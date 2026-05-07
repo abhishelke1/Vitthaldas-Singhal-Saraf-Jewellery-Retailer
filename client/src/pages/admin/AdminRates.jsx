@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, TrendingUp, Zap } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
@@ -27,67 +27,233 @@ export default function AdminRates() {
     finally { setSaving(false); }
   };
 
-  const fields = [
-    { key: 'gold24K', label: 'Gold 24K', desc: 'Per 10g', color: 'border-yellow-200 focus:border-yellow-400 focus:ring-yellow-400/20' },
-    { key: 'gold22K', label: 'Gold 22K', desc: 'Per 10g', color: 'border-amber-200 focus:border-amber-400 focus:ring-amber-400/20' },
-    { key: 'gold18K', label: 'Gold 18K', desc: 'Per 10g', color: 'border-orange-200 focus:border-orange-400 focus:ring-orange-400/20' },
-    { key: 'silver999', label: 'Silver 999', desc: 'Per 1kg', color: 'border-gray-300 focus:border-gray-400 focus:ring-gray-400/20' },
-    { key: 'silver925', label: 'Silver 925', desc: 'Per 1kg', color: 'border-slate-300 focus:border-slate-400 focus:ring-slate-400/20' },
-    { key: 'platinum', label: 'Platinum', desc: 'Per 10g', color: 'border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400/20' },
+  const metalFields = [
+    {
+      group: 'Gold',
+      icon: '✦',
+      color: '#D4AF37',
+      bgGradient: 'linear-gradient(135deg, #5C0A0A, #8B1A1A)',
+      items: [
+        { key: 'gold24K', label: '24 Karat', purity: '99.9%', desc: 'Per 10g' },
+        { key: 'gold22K', label: '22 Karat', purity: '91.6%', desc: 'Per 10g' },
+        { key: 'gold18K', label: '18 Karat', purity: '75.0%', desc: 'Per 10g' },
+      ]
+    },
+    {
+      group: 'Silver',
+      icon: '◈',
+      color: '#9ca3af',
+      bgGradient: 'linear-gradient(135deg, #1a1a2e, #2a2a4e)',
+      items: [
+        { key: 'silver999', label: 'Silver 999', purity: '99.9%', desc: 'Per 1kg' },
+        { key: 'silver925', label: 'Silver 925', purity: '92.5%', desc: 'Per 1kg' },
+      ]
+    },
+    {
+      group: 'Platinum',
+      icon: '◉',
+      color: '#a5b4fc',
+      bgGradient: 'linear-gradient(135deg, #1e1b4b, #312e81)',
+      items: [
+        { key: 'platinum', label: 'Platinum', purity: '95.0%', desc: 'Per 10g' },
+      ]
+    }
   ];
 
   return (
     <>
       <Helmet><title>Metal Rates | Admin | VSS</title></Helmet>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400;500;600&display=swap');
+        .cinzel { font-family: 'Cinzel', serif; }
+        .lux-inter { font-family: 'Inter', sans-serif; }
+        .luxury-card {
+          background: #fff;
+          border: 1px solid rgba(212,175,55,0.15);
+          border-radius: 16px;
+          box-shadow: 0 4px 24px rgba(92,10,10,0.06);
+        }
+        .rate-card {
+          border-radius: 14px;
+          padding: 20px;
+          border: 1px solid rgba(255,255,255,0.08);
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        .rate-card::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -30%;
+          width: 120px;
+          height: 120px;
+          background: rgba(255,255,255,0.04);
+          border-radius: 50%;
+        }
+        .rate-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        }
+        .rate-input {
+          width: 100%;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 10px;
+          padding: 10px 14px 10px 32px;
+          font-size: 20px;
+          font-weight: 700;
+          color: white;
+          outline: none;
+          transition: all 0.2s;
+          font-family: 'Inter', sans-serif;
+          -moz-appearance: textfield;
+        }
+        .rate-input::-webkit-outer-spin-button,
+        .rate-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .rate-input:focus {
+          background: rgba(255,255,255,0.15);
+          border-color: rgba(212,175,55,0.6);
+          box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
+        }
+        .rate-input::placeholder { color: rgba(255,255,255,0.4); }
+        .group-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid rgba(212,175,55,0.15);
+        }
+        .btn-save {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(135deg, #5C0A0A, #8B1A1A);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          padding: 14px 32px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.25s;
+          font-family: 'Inter', sans-serif;
+          letter-spacing: 0.03em;
+        }
+        .btn-save:hover {
+          background: linear-gradient(135deg, #D4AF37, #B8960C);
+          box-shadow: 0 6px 24px rgba(212,175,55,0.35);
+          transform: translateY(-2px);
+        }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .refresh-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(212,175,55,0.1);
+          border: 1px solid rgba(212,175,55,0.2);
+          color: #B8960C;
+          border-radius: 10px;
+          padding: 8px 16px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: 'Inter', sans-serif;
+        }
+        .refresh-btn:hover { background: rgba(212,175,55,0.18); }
+        .info-card {
+          background: linear-gradient(135deg, rgba(212,175,55,0.06), rgba(212,175,55,0.03));
+          border: 1px solid rgba(212,175,55,0.2);
+          border-radius: 14px;
+          padding: 20px 24px;
+          margin-top: 24px;
+        }
+        @keyframes shimmer {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        .skeleton {
+          background: linear-gradient(90deg, #f7f3ee 25%, #f0ebe3 50%, #f7f3ee 75%);
+          background-size: 1000px 100%;
+          animation: shimmer 2s infinite;
+          border-radius: 12px;
+        }
+      `}</style>
+
       <AdminLayout title="Manage Metal Rates">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-end mb-6">
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
             <div>
-              <h3 className="text-xl font-heading font-medium text-brand-dark">Live Market Rates</h3>
-              <p className="text-sm text-gray-500 mt-1">Changes reflect instantly across all product pricing.</p>
+              <h2 className="cinzel text-xl font-semibold" style={{ color: '#5C0A0A' }}>Live Market Rates</h2>
+              <p className="lux-inter text-sm mt-1" style={{ color: '#b8a090' }}>Changes reflect instantly across all product pricing</p>
             </div>
-            <button onClick={fetchRates} className="text-brand-gold text-sm font-medium flex items-center gap-1.5 hover:text-brand-gold-dark">
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+            <button onClick={fetchRates} className="refresh-btn">
+              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Refresh Rates
             </button>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 md:p-8">
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, i) => <div key={i} className="h-20 bg-gray-50 animate-pulse rounded-lg" />)}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {fields.map(({ key, label, desc, color }) => (
-                    <div key={key} className="relative">
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
-                      <span className="text-[10px] text-gray-400 absolute top-0 right-0">{desc}</span>
-                      <div className="relative mt-2">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
-                        <input type="number" value={rates[key]} onChange={e => setRates({ ...rates, [key]: Number(e.target.value) })}
-                          className={`w-full border rounded-lg pl-8 pr-4 py-3 text-lg font-bold text-brand-dark outline-none transition-all focus:ring-4 ${color}`} />
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[...Array(6)].map((_, i) => <div key={i} className="skeleton" style={{ height: '140px' }} />)}
+            </div>
+          ) : (
+            <div className="luxury-card" style={{ padding: '28px' }}>
+              {metalFields.map(({ group, icon, color, bgGradient, items }) => (
+                <div key={group} style={{ marginBottom: '32px' }}>
+                  <div className="group-header">
+                    <span style={{ fontSize: '18px', color }}>{icon}</span>
+                    <h3 className="cinzel font-semibold text-base" style={{ color: '#5C0A0A' }}>{group} Rates</h3>
+                    <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, rgba(212,175,55,0.3), transparent)', marginLeft: '8px' }} />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {items.map(({ key, label, purity, desc }) => (
+                      <div key={key} className="rate-card" style={{ background: bgGradient }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                          <div>
+                            <p className="cinzel text-sm font-semibold text-white">{label}</p>
+                            <p className="lux-inter text-xs" style={{ color: 'rgba(255,255,255,0.5)', marginTop: '2px' }}>{purity} purity · {desc}</p>
+                          </div>
+                          <TrendingUp size={16} style={{ color: 'rgba(212,175,55,0.4)' }} />
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(212,175,55,0.7)', fontWeight: 700, fontSize: '14px', fontFamily: 'Inter' }}>₹</span>
+                          <input type="number" value={rates[key]}
+                            onChange={e => setRates({ ...rates, [key]: Number(e.target.value) })}
+                            className="rate-input" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
-              <button onClick={handleSave} disabled={saving || loading}
-                className="flex items-center gap-2 bg-brand-dark hover:bg-brand-gold text-white font-semibold px-8 py-3 rounded-md transition-colors disabled:opacity-50">
-                <Save size={18} /> {saving ? 'Saving...' : 'Publish Rates'}
-              </button>
-            </div>
-          </div>
+              ))}
 
-          <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
-            <h4 className="font-semibold text-blue-800 text-sm mb-2">How dynamic pricing works</h4>
-            <ul className="text-sm text-blue-700 space-y-1.5 list-disc pl-5">
-              <li>Base price = Net Weight × (Metal Rate / 10)</li>
-              <li>Making charges added based on product settings (flat, % or per gram).</li>
-              <li>Changes apply instantly to all products using dynamic pricing.</li>
-            </ul>
+              {/* Save Button */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid rgba(212,175,55,0.12)' }}>
+                <button onClick={handleSave} disabled={saving || loading} className="btn-save">
+                  {saving
+                    ? <><RefreshCw size={16} className="animate-spin" /> Saving...</>
+                    : <><Save size={16} /> Publish Rates</>
+                  }
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Info Box */}
+          <div className="info-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <Zap size={15} style={{ color: '#D4AF37' }} />
+              <h4 className="cinzel text-sm font-semibold" style={{ color: '#5C0A0A' }}>Dynamic Pricing Formula</h4>
+            </div>
+            <div className="lux-inter text-sm" style={{ color: '#7c5c5c', lineHeight: '1.8' }}>
+              <p>• <strong>Base Price</strong> = Net Weight × (Metal Rate ÷ 10)</p>
+              <p>• Making charges added based on product settings (flat, % or per gram)</p>
+              <p>• Rate changes apply <strong>instantly</strong> to all dynamically-priced products</p>
+            </div>
           </div>
         </div>
       </AdminLayout>
